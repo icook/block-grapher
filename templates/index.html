@@ -1,0 +1,105 @@
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  function millisecondsToStr (milliseconds) {
+    // TIP: to find current time in milliseconds, use:
+    // var  current_time_milliseconds = new Date().getTime();
+
+    function numberEnding (number) {
+      return (number > 1) ? 's' : '';
+    }
+
+    var temp = Math.floor(milliseconds / 1000);
+    var years = Math.floor(temp / 31536000);
+    if (years) {
+      return years + ' year' + numberEnding(years);
+    }
+    //TODO: Months! Maybe weeks? 
+    var days = Math.floor((temp %= 31536000) / 86400);
+    if (days) {
+      return days + ' day' + numberEnding(days);
+    }
+    var hours = Math.floor((temp %= 86400) / 3600);
+    if (hours) {
+      return hours + ' hour' + numberEnding(hours);
+    }
+    var minutes = Math.floor((temp %= 3600) / 60);
+    if (minutes) {
+      return minutes + ' minute' + numberEnding(minutes);
+    }
+    var seconds = temp % 60;
+    if (seconds) {
+      return seconds + ' second' + numberEnding(seconds);
+    }
+    return 'less than a second'; //'just now' //or other string you like;
+  }
+  var insight_root = "https://insight.bitpay.com/api/";
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+
+
+    var options = {
+      title: 'Interblock times',
+      curveType: 'function',
+      tooltip: { isHtml: true },
+      legend: { position: 'bottom' },
+      focusTarget: 'category',
+      series:
+        {
+          0: {targetAxisIndex:0},
+          1: {targetAxisIndex:0, pointShape: { type: 'circle' }, pointSize: 10 },
+          2: {targetAxisIndex:1},
+        },
+    };
+
+    var graphData = new google.visualization.DataTable();
+    graphData.addColumn('datetime', 'Solve Time');
+    graphData.addColumn('number', 'Difficulty');
+    graphData.addColumn('number', 'Block reward');
+    graphData.addColumn('number', 'Avg hashrate of last 15');
+
+    var blocks = {{ blocks | tojson }};
+    blocks.sort(function (a, b) { return a.height - b.height; });
+    blocks.reverse();
+    var processedBlocks = [];
+    var lastBlockTime = blocks[0].time;
+    var last15 = [];
+    for (i = 1; i < blocks.length; i++) { 
+      var block = blocks[i];
+      var interblockTime = lastBlockTime - block.time;
+
+      // Calculate last 15
+      last15.unshift([interblockTime, block.hashes_required]);
+      var last15Average = null;
+      if (last15.length > 15) {
+        last15.pop();
+        var totalTime = last15.reduce(function(a, b) { return parseFloat(a) + parseFloat(b[0]); });
+        var totalHashes = last15.reduce(function(a, b) { return parseFloat(a) + parseFloat(b[1]); });
+        last15Average = totalHashes / totalTime;
+      }
+
+      processedBlocks.push([
+          new Date(block.time * 1000),
+          block.difficulty,
+          parseFloat(block.subsidy),
+          last15Average,
+      ]);
+      lastBlockTime = block.time;
+    }
+    graphData.addRows(processedBlocks);
+    var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+    chart.draw(graphData, options);
+  }
+  </script>
+</head>
+<body>
+  <div id="curve_chart" style="width: 100%; height: 100%;"></div>
+</body>
+</html>
