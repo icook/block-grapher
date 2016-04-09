@@ -1,8 +1,6 @@
-import requests
 import json
 from decimal import Decimal
 from bitcoin.rpc import Proxy
-from requests.auth import HTTPBasicAuth
 from flask import Flask, jsonify, render_template
 import config
 
