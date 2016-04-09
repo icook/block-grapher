@@ -4,9 +4,10 @@ from decimal import Decimal
 from bitcoin.rpc import Proxy
 from requests.auth import HTTPBasicAuth
 from flask import Flask, jsonify, render_template
+import config
 
 app = Flask(__name__)
-access = Proxy("http://bitmark:dG0s0t7VgwawUqqzksMC@localhost:9266")
+access = Proxy(config.proxy_address)
 block_cache = {}
 
 
