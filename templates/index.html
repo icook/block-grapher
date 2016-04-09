@@ -97,9 +97,19 @@
     var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
     chart.draw(graphData, options);
   }
+
+  $(function () {
+    $("#stepSize").change(function (e) {
+      var stepSize = $(this).val();
+      window.location.href = '/{{ start }}/' + stepSize;
+    });
+  });
   </script>
 </head>
 <body>
   <div id="curve_chart" style="width: 100%; height: 100%;"></div>
+  <a href="/{{ start - step }}/{{ step }}">Previous Page</a>
+  <input type="number" value="{{ step }}" id="stepSize">
+  <a href="/{{ start + step }}/{{ step }}">Next Page</a>
 </body>
 </html>

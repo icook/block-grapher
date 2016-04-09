@@ -10,10 +10,13 @@ access = Proxy("http://bitmark:dG0s0t7VgwawUqqzksMC@localhost:9266")
 block_cache = {}
 
 
-@app.route('/<start>/<end>/')
-def hello_world(start, end):
-    end = int(end)
+@app.route('/<start>/<step>/')
+def hello_world(start, step):
+    step = int(step)
+    if step > 500:
+        step = 500
     start = int(start)
+    end = start + step
     blocks = []
     for i in range(start, end):
         if i in block_cache:
@@ -39,7 +42,7 @@ def hello_world(start, end):
         block_cache[i] = block_info
         blocks.append(block_info)
 
-    return render_template("index.html", blocks=blocks)
+    return render_template("index.html", blocks=blocks, start=start, step=step)
 
 if __name__ == '__main__':
     app.run(debug=True)
