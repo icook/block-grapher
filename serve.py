@@ -9,8 +9,14 @@ access = Proxy(config.proxy_address)
 block_cache = {}
 
 
-@app.route('/<start>/<step>/')
-def hello_world(start, step):
+@app.route('/')
+def home():
+    info = access.getinfo()
+    return render_template("home.html", info=info)
+
+
+@app.route('/graph/<start>/<step>/')
+def graph(start, step):
     step = int(step)
     if step > 2000:
         step = 2000
