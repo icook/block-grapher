@@ -40,11 +40,39 @@
   }
   var insight_root = "https://insight.bitpay.com/api/";
   google.charts.load('current', {'packages':['corechart']});
-  google.charts.setOnLoadCallback(drawChart);
+  google.charts.setOnLoadCallback(drawMainChart);
+  google.charts.setOnLoadCallback(drawBlockChart);
+  var blocks = {{ blocks | tojson }};
+  blocks.sort(function (a, b) { return a.height - b.height; });
+  blocks.reverse();
 
-  function drawChart() {
+  var processedBlocks = [];
+  function drawBlockChart() {
+    var options = {
+      title: 'Block Distribution',
+      curveType: 'function',
+      focusTarget: 'category',
+      legend: 'none',
+      series:
+        {
+          0: {targetAxisIndex:0, pointShape: { type: 'circle' }, pointSize: 10, lineWidth: 0, dataOpacity: 0.1 },
+        },
+    };
 
+    var graphData = new google.visualization.DataTable();
+    graphData.addColumn('datetime', 'Solve Time');
+    graphData.addColumn('number', 'Block Height');
 
+    for (i = 1; i < blocks.length; i++) {
+      var block = blocks[i];
+      processedBlocks.push([new Date(block.time * 1000), block.height]);
+    }
+    graphData.addRows(processedBlocks);
+    var chart = new google.visualization.LineChart(document.getElementById('block_chart'));
+    chart.draw(graphData, options);
+  }
+
+  function drawMainChart() {
     var options = {
       title: 'Interblock times',
       curveType: 'function',
@@ -54,7 +82,7 @@
       series:
         {
           0: {targetAxisIndex:0},
-          1: {targetAxisIndex:0, pointShape: { type: 'circle' }, pointSize: 20, lineWidth: 0, dataOpacity: 0.2 },
+          1: {targetAxisIndex:0},
           2: {targetAxisIndex:1},
         },
     };
@@ -65,13 +93,10 @@
     graphData.addColumn('number', 'Block reward');
     graphData.addColumn('number', 'Avg hashrate of last 15');
 
-    var blocks = {{ blocks | tojson }};
-    blocks.sort(function (a, b) { return a.height - b.height; });
-    blocks.reverse();
     var processedBlocks = [];
     var lastBlockTime = blocks[0].time;
     var last15 = [];
-    for (i = 1; i < blocks.length; i++) { 
+    for (i = 1; i < blocks.length; i++) {
       var block = blocks[i];
       var interblockTime = lastBlockTime - block.time;
 
@@ -94,7 +119,7 @@
       lastBlockTime = block.time;
     }
     graphData.addRows(processedBlocks);
-    var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+    var chart = new google.visualization.LineChart(document.getElementById('main_chart'));
     chart.draw(graphData, options);
   }
 
@@ -107,7 +132,8 @@
   </script>
 </head>
 <body>
-  <div id="curve_chart" style="width: 100%; height: 100%;"></div>
+  <div id="main_chart" style="width: 100%; height: 85%;"></div>
+  <div id="block_chart" style="width: 100%; height: 10%;"></div>
   <a href="/{{ start - step }}/{{ step }}">Previous Page</a>
   <input type="number" value="{{ step }}" id="stepSize">
   <a href="/{{ start + step }}/{{ step }}">Next Page</a>
