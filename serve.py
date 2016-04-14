@@ -12,8 +12,8 @@ block_cache = {}
 @app.route('/<start>/<step>/')
 def hello_world(start, step):
     step = int(step)
-    if step > 500:
-        step = 500
+    if step > 2000:
+        step = 2000
     start = int(start)
     end = start + step
     blocks = []
