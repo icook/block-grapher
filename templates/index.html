@@ -1,5 +1,5 @@
-<html>
-<head>
+{% extends "base.html" %}
+{% block header %}
   <script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script type="text/javascript">
@@ -130,12 +130,11 @@
     });
   });
   </script>
-</head>
-<body>
-  <div id="main_chart" style="width: 100%; height: 85%;"></div>
-  <div id="block_chart" style="width: 100%; height: 10%;"></div>
-  <a href="/{{ start - step }}/{{ step }}">Previous Page</a>
-  <input type="number" value="{{ step }}" id="stepSize">
-  <a href="/{{ start + step }}/{{ step }}">Next Page</a>
-</body>
-</html>
+{% endblock %}
+{% block body %}
+<div id="main_chart" style="width: 100%; height: 85%;"></div>
+<div id="block_chart" style="width: 100%; height: 10%;"></div>
+<a href="/{{ start - step }}/{{ step }}">Previous Page</a>
+<input type="number" value="{{ step }}" id="stepSize">
+<a href="/{{ start + step }}/{{ step }}">Next Page</a>
+{% endblock %}

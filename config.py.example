@@ -1,1 +1,1 @@
-proxy_address = "http://username:password@localhost:port_number"
+proxy_addresses = [{"name": "Zmark", "address": "http://username:password@localhost:port_number"}]

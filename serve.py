@@ -1,22 +1,46 @@
 import json
 from decimal import Decimal
 from bitcoin.rpc import Proxy
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, session, redirect, url_for
 import config
 
 app = Flask(__name__)
-access = Proxy(config.proxy_address)
+app.secret_key = "tsdkfljglkjsdfg"
+proxies = []
+for conf in config.proxy_addresses:
+    p = Proxy(conf['address'])
+    p.name = conf['name']
+    proxies.append(p)
+
 block_cache = {}
+
+
+def fetch_proxy():
+    try:
+        proxy = proxies[session.get('proxy', 0)]
+    except IndexError:
+        proxy = proxies[0]
+        session['proxy'] = 0
+
+    return proxy
+
+
+@app.route('/change_proxy/<int:idx>')
+def change_proxy(idx):
+    session['proxy'] = idx
+    return redirect(url_for('home'))
 
 
 @app.route('/')
 def home():
-    info = access.getinfo()
-    return render_template("home.html", info=info)
+    proxy = fetch_proxy()
+    info = proxy.getinfo()
+    return render_template("home.html", info=info, proxies=proxies, proxy=proxy)
 
 
 @app.route('/graph/<start>/<step>/')
 def graph(start, step):
+    proxy = fetch_proxy()
     step = int(step)
     if step > 2000:
         step = 2000
@@ -25,11 +49,11 @@ def graph(start, step):
     blocks = []
     for i in range(start, end):
         if i in block_cache:
-            blocks.append(block_cache[i])
+            blocks.append(block_cache["{}_{}".format(proxy.name, i)])
             continue
 
-        blockhash = access.getblockhash(i)
-        block = access.getblock(blockhash)
+        blockhash = proxy.getblockhash(i)
+        block = proxy.getblock(blockhash)
         block_info = dict(difficulty=block.difficulty,
                           height=i,
                           time=block.nTime,
@@ -44,7 +68,7 @@ def graph(start, step):
 
         block_info['subsidy'] = str(block_info['subsidy'])
 
-        block_cache[i] = block_info
+        block_cache["{}_{}".format(proxy.name, i)] = block_info
         blocks.append(block_info)
 
     return render_template("index.html", blocks=blocks, start=start, step=step)
