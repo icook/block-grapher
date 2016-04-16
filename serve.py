@@ -71,7 +71,7 @@ def graph(start, step):
         block_cache["{}_{}".format(proxy.name, i)] = block_info
         blocks.append(block_info)
 
-    return render_template("graph.html", blocks=blocks, start=start, step=step)
+    return render_template("graph.html", blocks=blocks, start=start, step=step, proxy=proxy)
 
 if __name__ == '__main__':
     app.run(debug=True)
