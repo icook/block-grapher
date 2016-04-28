@@ -6,41 +6,26 @@ import config
 
 app = Flask(__name__)
 app.secret_key = "tsdkfljglkjsdfg"
-proxies = []
+proxies = {}
 for conf in config.proxy_addresses:
     p = Proxy(conf['address'])
     p.name = conf['name']
-    proxies.append(p)
+    proxies[conf['name']] = p
 
 block_cache = {}
 
 
-def fetch_proxy():
-    try:
-        proxy = proxies[session.get('proxy', 0)]
-    except IndexError:
-        proxy = proxies[0]
-        session['proxy'] = 0
-
-    return proxy
-
-
-@app.route('/change_proxy/<int:idx>')
-def change_proxy(idx):
-    session['proxy'] = idx
-    return redirect(url_for('home'))
-
-
 @app.route('/')
 def home():
-    proxy = fetch_proxy()
-    info = proxy.getinfo()
-    return render_template("home.html", info=info, proxies=proxies, proxy=proxy)
+    coins = []
+    for proxy in proxies.values():
+        coins.append((proxy, proxy.getinfo()))
+    return render_template("home.html", coins=coins)
 
 
-@app.route('/graph/<start>/<step>/')
-def graph(start, step):
-    proxy = fetch_proxy()
+@app.route('/graph/<currency>/<start>/<step>/')
+def graph(currency, start, step):
+    proxy = proxies[currency]
     step = int(step)
     if step > 2000:
         step = 2000

@@ -1,56 +1,38 @@
 {% extends "base.html" %}
-{% block header %}
-<script>
-  $(function () {
-    $("#proxyInformation").change(function (e) {
-      var proxyIndex = $(this).val();
-      window.location.href = '/change_proxy/' + proxyIndex;
-    });
-  });
-</script>
-{% endblock %}
 
 {% block body %}
 <div class="container">
   <h2>Block Grapher</h2>
-  <hr>
-  <b>Select active RPC connection to use: </b>
-  <select id="proxyInformation">
-    {% for proxyi in proxies %}
-    <option value="{{ loop.index0 }}" {% if proxy == proxyi %} selected{% endif %}>
-    {{ proxyi.name }}
-    </option>
-    {% endfor %}
-  </select>
-  <h3>Connection information</h3>
-  <b>Currently connected to {{ proxy.name }}</b>
-  <div class="well well-sm">
-    {% for k, v in info.items() %}
-    <b>{{ k }}:</b> {{ v }}<br>
-    {% endfor %}
-  </div>
-  <hr>
-  <h3>Graph Guide</h3>
-  <table class="table table-hover">
-    {% set height = info['blocks'] %}
-    <tr>
-      <th>Starting block height</th>
-      <th colspan="5">Number of blocks to graph</th>
-    </tr>
-    </tr>
-    {% for block in range(height // 100) %}
-    <tr>
-      {% set base_height = height - (block * 100) - 100 %}
-      <th>{{ "{:,}".format(base_height) }}</th>
-      {% for step in [100, 250, 500, 1000, 2000] %}
-        {% if base_height + step <= height %}
-        <td><a class="btn btn-info btn-sm" href="/graph/{{ base_height }}/{{ step }}">{{ step }} ({{ (step * 2.5 / 60) | int }} hours)</a></td>
-        {% else %}
-        <td></td>
-        {% endif %}
+  {% for proxy, info in coins %}
+  <h3>{{ proxy.name }} Connection information</h3>
+    <div class="well well-sm">
+      {% for k, v in info.items() %}
+      <b>{{ k }}:</b> {{ v }}<br>
       {% endfor %}
-    </tr>
-    {% endfor %}
-  </table>
+    </div>
+    <hr>
+    <h3>Graph Guide</h3>
+    <table class="table table-hover">
+      {% set height = info['blocks'] %}
+      <tr>
+        <th>Starting block height</th>
+        <th colspan="5">Number of blocks to graph</th>
+      </tr>
+      </tr>
+      {% for block in range(height // 100) %}
+      <tr>
+        {% set base_height = height - (block * 100) - 100 %}
+        <th>{{ "{:,}".format(base_height) }}</th>
+        {% for step in [100, 250, 500, 1000, 2000] %}
+          {% if base_height + step <= height %}
+          <td><a class="btn btn-info btn-sm" href="/graph/{{ proxy.name }}/{{ base_height }}/{{ step }}">{{ step }} ({{ (step * 2.5 / 60) | int }} hours)</a></td>
+          {% else %}
+          <td></td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+  {% endfor %}
 </div>
 {% endblock %}
