@@ -10,29 +10,13 @@
       <b>{{ k }}:</b> {{ v }}<br>
       {% endfor %}
     </div>
-    <hr>
     <h3>Graph Guide</h3>
-    <table class="table table-hover">
-      {% set height = info['blocks'] %}
-      <tr>
-        <th>Starting block height</th>
-        <th colspan="5">Number of blocks to graph</th>
-      </tr>
-      </tr>
-      {% for block in range(height // 100) %}
-      <tr>
-        {% set base_height = height - (block * 100) - 100 %}
-        <th>{{ "{:,}".format(base_height) }}</th>
-        {% for step in [100, 250, 500, 1000, 2000] %}
-          {% if base_height + step <= height %}
-          <td><a class="btn btn-info btn-sm" href="/graph/{{ proxy.name }}/{{ base_height }}/{{ step }}">{{ step }} ({{ (step * 2.5 / 60) | int }} hours)</a></td>
-          {% else %}
-          <td></td>
-          {% endif %}
-        {% endfor %}
-      </tr>
-      {% endfor %}
-    </table>
+    <ul>
+      <li><a href="/graph/{{ proxy.name }}/{{ now - 21600 }}/{{ now }}">Last 6 hours</a></li>
+      <li><a href="/graph/{{ proxy.name }}/{{ now - 86400 }}/{{ now }}">Last 24 hours</a></li>
+      <li><a href="/graph/{{ proxy.name }}/{{ now - 605500 }}/{{ now }}">Last 7 days</a></li>
+    </ul>
+    <hr>
   {% endfor %}
 </div>
 {% endblock %}
