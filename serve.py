@@ -122,7 +122,9 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
 
             percent_complete = (i - last_sync_height) / (info['blocks'] - last_sync_height) * 100
             if i % 100 == 0:
-                yield "{:,}/{:,} ({:,.2f}) Synced {} {:,}\n".format(i, info['blocks'], percent_complete, block_obj.currency, block_obj.height)
+                msg = "{:,}/{:,} ({:,.2f}) Synced {} {:,}\n".format(i, info['blocks'], percent_complete, block_obj.currency, block_obj.height)
+                yield msg
+                app.logger.warn(msg)
         yield "sync complete!"
 
 if __name__ == '__main__':
