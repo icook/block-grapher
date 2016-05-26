@@ -153,5 +153,6 @@ if __name__ == '__main__':
         with app.app_context():
             for msg in sync_db():
                 sys.stdout.write(msg)
+        exit()
 
     app.run(debug=True)
