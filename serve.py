@@ -1,5 +1,6 @@
 import datetime
 import time
+import logging
 import sqlalchemy.exc
 from decimal import Decimal
 from bitcoin.rpc import Proxy
@@ -37,6 +38,17 @@ class Block(db.Model):
         return time.mktime(self.time.timetuple())
 
 
+@app.before_first_request
+def setup_logging():
+    if not app.debug:
+        # In production mode, add log handler to sys.stderr.
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler = logging.StreamHandler()
+        app.logger.addHandler(handler)
+        app.logger.setLevel(logging.INFO)
+        handler.setFormatter(formatter)
+
+
 @app.route('/')
 def home():
     coins = []
@@ -70,6 +82,7 @@ def sync():
     return Response(stream_with_context(sync_db()), mimetype='text/plain')
 
 def sync_db(proxies_to_sync=None, max_sync_number=None):
+    app.logger.info("Starting sync")
     db.create_all()
 
     # Default to syncing all configured proxies
@@ -84,6 +97,8 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
         # We're already at the latest block, no need to sync
         if info['blocks'] <= last_sync_height:
             continue
+
+        app.logger.info("Starting sync for {}. {} blocks to sync".format(proxy.name, info['blocks'] - last_sync_height))
 
         # If we have to sync for too long abort trying to render the page. It
         # will be an unnaceptable delay
@@ -125,7 +140,7 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
                 msg = "{:,}/{:,} ({:,.2f}) Synced {} {:,}\n".format(i, info['blocks'], percent_complete, block_obj.currency, block_obj.height)
                 yield msg
                 app.logger.warn(msg)
-        yield "sync complete!"
+        yield "sync of {} complete!\n".format(proxy.name)
 
 if __name__ == '__main__':
     app.run(debug=True)
