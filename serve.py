@@ -1,4 +1,5 @@
 import datetime
+import sys
 import time
 import logging
 import sqlalchemy.exc
@@ -143,4 +144,9 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
         yield "sync of {} complete!\n".format(proxy.name)
 
 if __name__ == '__main__':
+    if sys.argv[1] == "sync":
+        with app.app_context():
+            for msg in sync_db():
+                sys.stdout.write(msg)
+
     app.run(debug=True)
