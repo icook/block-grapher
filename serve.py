@@ -107,6 +107,7 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
             abort(401)
 
         next_blockhash = None
+        start = time.time()
         for i in range(last_sync_height + 1, info['blocks']):
             # If we found a next blockhash...
             if next_blockhash:
@@ -131,16 +132,20 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
                 time=datetime.datetime.utcfromtimestamp(block.nTime))
             db.session.add(block_obj)
 
-            try:
-                db.session.commit()
-            except (sqlalchemy.exc.IntegrityError, sqlalchemy.orm.exc.FlushError):
-                db.session.rollback()
-
-            percent_complete = (i - last_sync_height) / (info['blocks'] - last_sync_height) * 100
             if i % 100 == 0:
-                msg = "{:,}/{:,} ({:,.2f}) Synced {} {:,}\n".format(i, info['blocks'], percent_complete, block_obj.currency, block_obj.height)
+                percent_complete = (i - last_sync_height) / (info['blocks'] - last_sync_height) * 100
+                time_estimate = ((time.time() - start) / (i - last_sync_height)) * (info['blocks'] - i) / 60
+                msg = "{:,}/{:,} ({:,.2f}) Synced {} {:,}. Est {:,.2f} minutes left\n".format(
+                    i, info['blocks'], percent_complete, block_obj.currency, block_obj.height, time_estimate)
                 yield msg
-                app.logger.warn(msg)
+                app.logger.info(msg)
+
+                try:
+                    db.session.commit()
+                except (sqlalchemy.exc.IntegrityError, sqlalchemy.orm.exc.FlushError):
+                    app.logger.exception("Failed to commit new block")
+                    db.session.rollback()
+
         yield "sync of {} complete!\n".format(proxy.name)
 
 if __name__ == '__main__':
