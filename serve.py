@@ -97,6 +97,7 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
 
         # We're already at the latest block, no need to sync
         if info['blocks'] <= last_sync_height:
+            yield "sync of {} unneeded\n".format(proxy.name)
             continue
 
         app.logger.info("Starting sync for {}. {} blocks to sync".format(proxy.name, info['blocks'] - last_sync_height))
