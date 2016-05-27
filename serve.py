@@ -36,7 +36,7 @@ class Block(db.Model):
 
     @property
     def nTime(self):
-        return time.mktime(self.time.timetuple())
+        return int(time.mktime(self.time.timetuple()))
 
 
 @app.before_first_request
@@ -54,7 +54,8 @@ def setup_logging():
 def home():
     coins = []
     for proxy in proxies.values():
-        coins.append((proxy, proxy.getinfo()))
+        last_block = Block.query.filter_by(currency=proxy.name).order_by(Block.time.desc()).first()
+        coins.append((proxy, last_block))
     return render_template("home.html", coins=coins, now=int(time.time()))
 
 
