@@ -1,6 +1,7 @@
 import datetime
 import sys
 import time
+import ago
 import logging
 import sqlalchemy.exc
 from decimal import Decimal
@@ -21,6 +22,19 @@ for conf in config.proxy_addresses:
 block_cache = {}
 # We store needed block information that is an ephemeral cache
 db = SQLAlchemy(app)
+
+
+@app.template_filter('human_date')
+def human_date_utc(*args, **kwargs):
+    print(type(args[0]))
+    if isinstance(args[0], type(None)):
+        return "never"
+    if isinstance(args[0], (int, float, str)):
+        args = [datetime.datetime.utcfromtimestamp(float(args[0]))] + list(args[1:])
+    delta = (datetime.datetime.utcnow() - args[0])
+    delta = delta - datetime.timedelta(microseconds=delta.microseconds)
+    result = ago.human(delta, *args[1:], **kwargs)
+    return "just now" if result == " ago" else result
 
 
 class Block(db.Model):
