@@ -26,7 +26,6 @@ db = SQLAlchemy(app)
 
 @app.template_filter('human_date')
 def human_date_utc(*args, **kwargs):
-    print(type(args[0]))
     if isinstance(args[0], type(None)):
         return "never"
     if isinstance(args[0], (int, float, str)):
@@ -43,7 +42,7 @@ def duration(seconds):
     if seconds > 7776000:
         return "{}".format(datetime.timedelta(seconds=seconds))
     if seconds >= 86400:
-        return "{} days".format(seconds / 86400)
+        return "{:,.1f} days".format(seconds / 86400)
     if seconds >= 3600:
         return "{:,.1f} hours".format(seconds / 3600)
     if seconds >= 60:
