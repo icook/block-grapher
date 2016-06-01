@@ -37,6 +37,24 @@ def human_date_utc(*args, **kwargs):
     return "just now" if result == " ago" else result
 
 
+@app.template_filter('duration')
+def duration(seconds):
+    # microseconds
+    if seconds > 7776000:
+        return "{}".format(datetime.timedelta(seconds=seconds))
+    if seconds >= 86400:
+        return "{} days".format(seconds / 86400)
+    if seconds >= 3600:
+        return "{:,.1f} hours".format(seconds / 3600)
+    if seconds >= 60:
+        return "{:,.2f} mins".format(seconds / 60.0)
+    if seconds <= 1.0e-3:
+        return "{:,.4f} us".format(seconds * 1000000.0)
+    if seconds <= 1.0:
+        return "{:,.4f} ms".format(seconds * 1000.0)
+    return "{:,.4f} sec".format(seconds)
+
+
 class Block(db.Model):
     height = db.Column(db.Integer, primary_key=True)
     currency = db.Column(db.Integer, primary_key=True)
@@ -73,14 +91,14 @@ def home():
     return render_template("home.html", coins=coins, now=int(time.time()))
 
 
-@app.route('/graph/<currency>/<start>/<stop>/')
+@app.route('/graph/<currency>/<int:start>/<int:stop>/')
 def graph(currency, start, stop):
     proxy = proxies[currency]
-    start = datetime.datetime.utcfromtimestamp(float(start))
-    stop = datetime.datetime.utcfromtimestamp(float(stop))
+    start_dt = datetime.datetime.utcfromtimestamp(start)
+    stop_dt = datetime.datetime.utcfromtimestamp(stop)
     block_objs = (Block.query.filter_by(currency=currency).
-                  filter(Block.time > start).
-                  filter(Block.time < stop).
+                  filter(Block.time > start_dt).
+                  filter(Block.time < stop_dt).
                   order_by(Block.time.desc()).
                   limit(2000))
     blocks = [dict(difficulty=block.difficulty,
@@ -90,7 +108,13 @@ def graph(currency, start, stop):
                    hashes_required=block.hashes_required) for block in block_objs]
 
 
-    return render_template("graph.html", blocks=blocks, start=start, proxy=proxy)
+    return render_template("graph.html",
+                           blocks=blocks,
+                           start=start,
+                           stop=stop,
+                           start_dt=start_dt,
+                           stop_dt=stop_dt,
+                           proxy=proxy)
 
 
 @app.route('/sync')

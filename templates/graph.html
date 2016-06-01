@@ -73,7 +73,6 @@
 
   function drawMainChart() {
     var options = {
-      title: '{{ proxy.name }} Interblock times',
       curveType: 'function',
       tooltip: { isHtml: true },
       legend: { position: 'bottom' },
@@ -121,16 +120,30 @@
     var chart = new google.visualization.LineChart(document.getElementById('main_chart'));
     chart.draw(graphData, options);
   }
-
-  $(function () {
-    $("#stepSize").change(function (e) {
-      var stepSize = $(this).val();
-      window.location.href = '/{{ start }}/' + stepSize;
-    });
-  });
   </script>
 {% endblock %}
 {% block body %}
+{% set timespan = stop - start %}
+{% set midpoint = start + timespan %}
+<div class="container">
+  <h3>{{ timespan | duration }} of {{ proxy.name }} blocks starting {{ start | human_date }} ({{ start_dt }})</h3>
+</div>
 <div id="main_chart" style="width: 100%; height: 85%;"></div>
 <div id="block_chart" style="width: 100%; height: 10%;"></div>
+<h4>Move forward or backward</h4>
+<ul>
+  <li><a href="/graph/{{ proxy.name }}/{{ start - timespan }}/{{ stop - timespan }}">Previous {{ timespan | duration }}</a></li>
+  <li><a href="/graph/{{ proxy.name }}/{{ start + timespan }}/{{ stop + timespan }}">Next {{ timespan | duration }}</a></li>
+</ul>
+<h4>Change time window (zoom level)</h4>
+<ul>
+  {% for span in (3600, 21600, 86400, 604800, 2592000) %}
+  {% set halfspan = span // 2 %}
+  {% if span != timespan %}
+    <li><a href="/graph/{{ proxy.name }}/{{ midpoint - halfspan }}/{{ stop + halfspan }}">View {{ span | duration }}</a></li>
+  {% else %}
+    <li>Current Timespan</li>
+  {% endif %}
+  {% endfor %}
+</ul>
 {% endblock %}
