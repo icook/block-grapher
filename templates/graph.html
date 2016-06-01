@@ -73,6 +73,9 @@
 
   function drawMainChart() {
     var options = {
+      explorer: {
+        actions: ['dragToZoom', 'rightClickToReset']
+      },
       curveType: 'function',
       tooltip: { isHtml: true },
       legend: { position: 'bottom' },
@@ -127,6 +130,7 @@
 {% set midpoint = start + timespan %}
 <div class="container">
   <h3>{{ timespan | duration }} of {{ proxy.name }} blocks starting {{ start | human_date }} ({{ start_dt }})</h3>
+  Drag an area to zoom, right click to reset to full view
 </div>
 <div id="main_chart" style="width: 100%; height: 85%;"></div>
 <div id="block_chart" style="width: 100%; height: 10%;"></div>
