@@ -6,7 +6,7 @@
   {% for proxy, last_block in coins %}
   <h3>{{ proxy.name }}</h3>
     {% if last_block %}
-      Last Block on record was <b>{{ last_block.time | human_date }}</b>
+    Last Block on record was <b>{{ last_block.time | human_date }}</b>, number {{ "{:,}".format(last_block.height) }}
       <h3>Graph Guide</h3>
       <ul>
         <li><a href="/graph/{{ proxy.name }}/{{ last_block.nTime - 21600 }}/{{ last_block.nTime }}">Last 6 hours</a></li>
