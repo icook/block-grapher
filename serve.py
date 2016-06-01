@@ -184,6 +184,7 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
                 except (sqlalchemy.exc.IntegrityError, sqlalchemy.orm.exc.FlushError):
                     app.logger.exception("Failed to commit new block")
                     db.session.rollback()
+        db.session.commit()
 
         yield "sync of {} complete!\n".format(proxy.name)
 
