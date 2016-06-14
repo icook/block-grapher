@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block header %}
   <script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- NVD3 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.3/nv.d3.css" rel="stylesheet">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.3/nv.d3.js"></script>
+  <script type="text/javascript" src="/static/linePlusLineChart.js"></script>
+
   <script type="text/javascript">
   function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -38,65 +43,17 @@
     }
     return 'less than a second'; //'just now' //or other string you like;
   }
-  var insight_root = "https://insight.bitpay.com/api/";
-  google.charts.load('current', {'packages':['corechart']});
-  google.charts.setOnLoadCallback(drawMainChart);
-  google.charts.setOnLoadCallback(drawBlockChart);
+
   var blocks = {{ blocks | tojson }};
   blocks.sort(function (a, b) { return a.height - b.height; });
   blocks.reverse();
 
-  var processedBlocks = [];
-  function drawBlockChart() {
-    var options = {
-      curveType: 'function',
-      focusTarget: 'category',
-      legend: 'none',
-      series:
-        {
-          0: {targetAxisIndex:0, pointShape: { type: 'circle' }, pointSize: 10, lineWidth: 0, dataOpacity: 0.1 },
-        },
-    };
-
-    var graphData = new google.visualization.DataTable();
-    graphData.addColumn('datetime', 'Solve Time');
-    graphData.addColumn('number', 'Block Height');
-
-    for (i = 1; i < blocks.length; i++) {
-      var block = blocks[i];
-      processedBlocks.push([new Date(block.time * 1000), block.height]);
-    }
-    graphData.addRows(processedBlocks);
-    var chart = new google.visualization.LineChart(document.getElementById('block_chart'));
-    chart.draw(graphData, options);
-  }
-
-  function drawMainChart() {
-    var options = {
-      explorer: {
-        actions: ['dragToZoom', 'rightClickToReset']
-      },
-      curveType: 'function',
-      tooltip: { isHtml: true },
-      legend: { position: 'bottom' },
-      focusTarget: 'category',
-      series:
-        {
-          0: {targetAxisIndex:0},
-          1: {targetAxisIndex:0},
-          2: {targetAxisIndex:1},
-        },
-    };
-
-    var graphData = new google.visualization.DataTable();
-    graphData.addColumn('datetime', 'Solve Time');
-    graphData.addColumn('number', 'Difficulty');
-    graphData.addColumn('number', 'Block reward');
-    graphData.addColumn('number', 'Avg hashrate of last 15');
-
-    var processedBlocks = [];
+  nv.addGraph(function() {
     var lastBlockTime = blocks[0].time;
     var last15 = [];
+    var diffLineData = [];
+    var subsidyLineData = [];
+    var lastFifteenData = [];
     for (i = 1; i < blocks.length; i++) {
       var block = blocks[i];
       var interblockTime = lastBlockTime - block.time;
@@ -111,18 +68,38 @@
         last15Average = totalHashes / totalTime;
       }
 
-      processedBlocks.push([
-          new Date(block.time * 1000),
-          block.difficulty,
-          parseFloat(block.subsidy),
-          last15Average,
-      ]);
+      var blockDate = block.time * 1000;
+      diffLineData.push({x: blockDate, y: block.difficulty});
+      subsidyLineData.push({x: blockDate, y: parseFloat(block.subsidy)});
+      lastFifteenData.push({x: blockDate, y: last15Average});
       lastBlockTime = block.time;
     }
-    graphData.addRows(processedBlocks);
-    var chart = new google.visualization.LineChart(document.getElementById('main_chart'));
-    chart.draw(graphData, options);
-  }
+
+    var chart = nv.models.linePlusLineChart()
+      .margin({left: 100});
+
+    chart.xAxis.tickFormat(function(d) { return d3.time.format('%b %d %H:%M:%S')(new Date(d)); });
+    chart.y1Axis.tickFormat(d3.format('s,.2f'));
+    chart.y2Axis.tickFormat(d3.format(',.2f'));
+
+    d3.select('#main_chart')
+        .datum([
+            {key: 'Difficulty',
+             values: diffLineData},
+            {key: 'Subsidy',
+             values: subsidyLineData},
+            {key: 'Last 15 Average',
+             bar: true,
+             values: lastFifteenData}
+            ])
+        
+        .transition().duration(100)
+        .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
   </script>
 {% endblock %}
 {% block body %}
@@ -132,7 +109,7 @@
   <h3>{{ timespan | duration }} of {{ proxy.name }} blocks starting {{ start | human_date }} ({{ start_dt }})</h3>
   Drag an area to zoom, right click to reset to full view
 </div>
-<div id="main_chart" style="width: 100%; height: 85%;"></div>
+<svg id="main_chart" style="width: 100%; height: 85%;"></svg>
 <div id="block_chart" style="width: 100%; height: 10%;"></div>
 <h4>Move forward or backward</h4>
 <ul>

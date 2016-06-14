@@ -10,7 +10,7 @@ from flask import Flask, jsonify, render_template, session, redirect, url_for, R
 from flask.ext.sqlalchemy import SQLAlchemy
 import config
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.secret_key = "tsdkfljglkjsdfg"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///index.db'
 proxies = {}
