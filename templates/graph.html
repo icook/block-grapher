@@ -7,6 +7,17 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.3/nv.d3.js"></script>
   <script type="text/javascript" src="/static/linePlusLineChart.js"></script>
 
+  <style>
+  #main_chart g.nv-context g.nv-scatter g.nv-series-0 path.nv-point
+  {
+      fill-opacity: 0.3;
+      stroke-opacity: 0.2;
+  }
+  #main_chart g.nv-context g.nv-series-0 path.nv-line
+  {
+      stroke-opacity: 0;
+  }
+  </style>
   <script type="text/javascript">
   function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
