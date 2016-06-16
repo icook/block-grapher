@@ -119,8 +119,9 @@
 {% set timespan = stop - start %}
 {% set midpoint = start + timespan %}
 <div class="container">
-  <h3>{{ timespan | duration }} of {{ proxy.name }} blocks starting {{ start | human_date }} ({{ start_dt }})</h3>
-  Drag an area to zoom, right click to reset to full view
+
+  <h3>{{ timespan | duration }} of {{ proxy.name }} blocks starting {{ start | human_date(precision=1) }} <small>({{ start_dt }})</small></h3>
+  Drag an area in the bottom graph to zoom, right click to reset to full view.
 </div>
 <svg id="main_chart" style="width: 100%; height: 85%;"></svg>
 <div id="block_chart" style="width: 100%; height: 10%;"></div>
