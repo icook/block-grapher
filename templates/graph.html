@@ -87,11 +87,12 @@
     }
 
     var chart = nv.models.linePlusLineChart()
-      .margin({left: 100});
+      .margin({left: 100,
+               right: 100});
 
     chart.xAxis.tickFormat(function(d) { return d3.time.format('%b %d %H:%M:%S')(new Date(d)); });
-    chart.y1Axis.tickFormat(d3.format('s,.2f'));
-    chart.y2Axis.tickFormat(d3.format(',.2f'));
+    chart.y1Axis.tickFormat(d3.format('s,.2f')).showMaxMin(false);
+    chart.y2Axis.tickFormat(d3.format(',.2f')).showMaxMin(false);
 
     d3.select('#main_chart')
         .datum([
