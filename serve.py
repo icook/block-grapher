@@ -60,6 +60,7 @@ class Block(db.Model):
     difficulty = db.Column(db.Float)
     time = db.Column(db.DateTime)
     subsidy = db.Column(db.Numeric)
+    last_fifteen = db.Column(db.Float)
 
     @property
     def hashes_required(self):
@@ -68,6 +69,12 @@ class Block(db.Model):
     @property
     def nTime(self):
         return int(time.mktime(self.time.timetuple()))
+
+    def __str__(self):
+        return "<{} Block height {:,}>".format(self.currency, self.height)
+
+    def __repr__(self):
+        return "<{} Block height {:,}>".format(self.currency, self.height)
 
 
 @app.before_first_request
@@ -104,7 +111,8 @@ def graph(currency, start, stop):
                    height=block.height,
                    time=block.nTime,
                    subsidy=float(block.subsidy),
-                   hashes_required=block.hashes_required) for block in block_objs]
+                   hashes_required=block.hashes_required,
+                   last_fifteen=block.last_fifteen) for block in block_objs]
 
 
     return render_template("graph.html",
@@ -131,6 +139,10 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
     for proxy in proxies_to_sync:
         info = proxy.getinfo()
         last_block = Block.query.filter_by(currency=proxy.name).order_by(Block.height.desc()).first()
+        if last_block:
+            last_blocks = Block.query.filter_by(currency=proxy.name).order_by(Block.height.desc()).filter(Block.height >= last_block.height - 15).all()
+        else:
+            last_blocks = []
         last_sync_height = last_block.height if last_block else 0
 
         # We're already at the latest block, no need to sync
@@ -169,6 +181,12 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
                 currency=proxy.name,
                 subsidy=subsidy,
                 time=datetime.datetime.utcfromtimestamp(block.nTime))
+            if len(last_blocks) >= 16:
+                last_blocks.pop()
+            last_blocks.insert(0, block_obj)
+            if len(last_blocks) >= 16:
+                total_hashes = sum([b.hashes_required for b in last_blocks[1:]])
+                block_obj.last_fifteen = float(total_hashes) / (last_blocks[0].time - last_blocks[-1].time).total_seconds()
             db.session.add(block_obj)
 
             if i % 100 == 0:

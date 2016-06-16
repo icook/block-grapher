@@ -6,6 +6,7 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.3/nv.d3.js"></script>
   <script type="text/javascript" src="/static/linePlusLineChart.js"></script>
+  <title>{{ blocks | length }} {{ proxy.name }} blocks</title>
 
   <style>
   #main_chart g.nv-context g.nv-scatter g.nv-series-0 path.nv-point
@@ -60,30 +61,15 @@
   blocks.reverse();
 
   nv.addGraph(function() {
-    var lastBlockTime = blocks[0].time;
-    var last15 = [];
     var diffLineData = [];
     var subsidyLineData = [];
     var lastFifteenData = [];
     for (i = 1; i < blocks.length; i++) {
       var block = blocks[i];
-      var interblockTime = lastBlockTime - block.time;
-
-      // Calculate last 15
-      last15.unshift([interblockTime, block.hashes_required]);
-      var last15Average = null;
-      if (last15.length > 15) {
-        last15.pop();
-        var totalTime = last15.reduce(function(a, b) { return parseFloat(a) + parseFloat(b[0]); });
-        var totalHashes = last15.reduce(function(a, b) { return parseFloat(a) + parseFloat(b[1]); });
-        last15Average = totalHashes / totalTime;
-      }
-
       var blockDate = block.time * 1000;
       diffLineData.push({x: blockDate, y: block.difficulty});
       subsidyLineData.push({x: blockDate, y: parseFloat(block.subsidy)});
-      lastFifteenData.push({x: blockDate, y: last15Average});
-      lastBlockTime = block.time;
+      lastFifteenData.push({x: blockDate, y: block.last_fifteen});
     }
 
     var chart = nv.models.linePlusLineChart()
