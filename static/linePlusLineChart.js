@@ -380,8 +380,8 @@ nv.models.linePlusLineChart = function() {
                           return lines.x()(d,i) >= extent[0] && lines.x()(d,i) <= extent[1];
                       });
 
-                      var origPointIndex = nv.interactiveBisect(currentValues.reverse(), e.pointXValue, lines.x());
-                      var pointIndex = currentValues.length - origPointIndex;
+                      pointIndex = nv.interactiveBisect(currentValues.reverse(), e.pointXValue, lines.x());
+                      pointIndex = currentValues.length - pointIndex;
                       var point = currentValues[pointIndex];
                       var pointYValue = chart.y()(point, pointIndex);
                       if (pointYValue !== null) {
@@ -393,7 +393,7 @@ nv.models.linePlusLineChart = function() {
                       }
                       if (point === undefined) return;
                       if (singlePoint === undefined) singlePoint = point;
-                      if (pointXLocation === undefined) pointXLocation = chart.xScale()(chart.x()(currentValues[origPointIndex], origPointIndex));
+                      if (pointXLocation === undefined) pointXLocation = chart.xScale()(chart.x()(point,pointIndex));
                       allData.push({
                           key: series.key,
                           value: pointYValue,
