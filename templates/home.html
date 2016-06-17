@@ -2,17 +2,17 @@
 
 {% block body %}
 <div class="container">
-  <h2>Block Grapher</h2>
+  <h2>Currency List</h2>
   {% for proxy, last_block in coins %}
   <h3>{{ proxy.name }}</h3>
     {% if last_block %}
-    Last Block on record was <b>{{ last_block.time | human_date }}</b>, number {{ "{:,}".format(last_block.height) }}
-      <h3>Graph Guide</h3>
-      <ul>
-        <li><a href="/graph/{{ proxy.name }}/{{ last_block.nTime - 21600 }}/{{ last_block.nTime }}">Last 6 hours</a></li>
-        <li><a href="/graph/{{ proxy.name }}/{{ last_block.nTime - 86400 }}/{{ last_block.nTime }}">Last 24 hours</a></li>
-        <li><a href="/graph/{{ proxy.name }}/{{ last_block.nTime - 605500 }}/{{ last_block.nTime }}">Last 7 days</a></li>
-      </ul>
+    <p>Last Block on record was <b>{{ last_block.time | human_date }}</b>, number <b>{{ "{:,}".format(last_block.height) }}</b></p>
+    <div class="btn-group">
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/21600">Last 6 Hours</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/86400">Last 24 Hours</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/604800">Last 7 Days</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/2592000">Last 30 Days</a>
+    </div>
     {% endif %}
     <hr>
   {% endfor %}

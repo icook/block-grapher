@@ -115,25 +115,84 @@
 {% set timespan = stop - start %}
 {% set midpoint = start + timespan %}
 <div class="container-fluid">
-
+  {% if blocks %}
   <h3>{{ timespan | duration }} of {{ proxy.name }} blocks starting {{ start | human_date(precision=1) }} <small>({{ start_dt }})</small></h3>
-  Drag an area in the bottom graph to zoom, right click to reset to full view.
-<svg id="main_chart" style="width: 100%; height: 85%;"></svg>
-<h4>Move forward or backward</h4>
-<ul>
-  <li><a href="/graph/{{ proxy.name }}/{{ start - timespan }}/{{ stop - timespan }}">Previous {{ timespan | duration }}</a></li>
-  <li><a href="/graph/{{ proxy.name }}/{{ start + timespan }}/{{ stop + timespan }}">Next {{ timespan | duration }}</a></li>
-</ul>
-<h4>Change time window (zoom level)</h4>
-<ul>
-  {% for span in (3600, 21600, 86400, 604800, 2592000) %}
-  {% set halfspan = span // 2 %}
-  {% if span != timespan %}
-    <li><a href="/graph/{{ proxy.name }}/{{ midpoint - halfspan }}/{{ stop + halfspan }}">View {{ span | duration }}</a></li>
+  <p>Drag an area in the bottom graph to zoom, right click to reset to full view.</p>
+  <div class="col-md-8">
+    {% set blocks_found = blocks | length %}
+    <h4>Data Overview</h4>
+    <table class="table table-condensed">
+      <tr>
+        <th>Search Range</th>
+        <td>{{ start_dt }} - {{ stop_dt }}</td>
+      </tr>
+      <tr>
+        <th>Search Range (human)</th>
+        <td>{{ start_dt | human_date }} - {{ stop_dt | human_date }}</td>
+      </tr>
+      <tr>
+        <th>Search Range Duration</th>
+        <td>{{ timespan | duration }}</td>
+      </tr>
+      <tr>
+        <th>Found Time Range</th>
+        <td>{{ (blocks[0].time - blocks[-1].time) | duration }}</td>
+      </tr>
+      <tr>
+        <th>Found Block Range</th>
+        <td>{{ "{:,}".format(blocks[0].height) }} - {{ "{:,}".format(blocks[-1].height) }}</td>
+      </tr>
+      <tr>
+        <th>Average Solve Time</th>
+        <td>{{ ((blocks[0].time - blocks[-1].time) / (blocks | length)) | duration }}</td>
+      </tr>
+      <tr>
+        <th>Found Count</th>
+        <td>{{ blocks | length }} blocks</td>
+      </tr>
+      <tr>
+        <th>Time Window</th>
+        <td>
+          <div class="btn-group">
+            {% for span in (3600, 21600, 86400, 604800, 2592000) %}
+            {% set halfspan = span // 2 %}
+            <a class="{% if span == timespan %} disabled {% endif %} btn btn-default btn-sm" href="/graph/{{ proxy.name }}/{{ midpoint - halfspan }}/{{ stop + halfspan }}">{{ span | duration }}</a>
+            {% endfor %}
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>Adjust Search Forward  <i class="fa fa-angle-double-right"></li></th>
+        <td>
+          <div class="btn-group">
+            {% for span in (3600, 21600, 86400, 604800, 2592000) %}
+            <a class="btn btn-default btn-sm" href="/graph/{{ proxy.name }}/{{ start + span }}/{{ stop + span }}">{{ span | duration }}</a>
+            {% endfor %}
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>Adjust Search Backward <i class="fa fa-angle-double-left"></li></th>
+        <td>
+          <div class="btn-group">
+            {% for span in (3600, 21600, 86400, 604800, 2592000) %}
+            <a class="btn btn-default btn-sm" href="/graph/{{ proxy.name }}/{{ start - span }}/{{ stop - span }}">{{ span | duration }}</a>
+            {% endfor %}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <svg id="main_chart" style="width: 100%; height: 85%;"></svg>
   {% else %}
-    <li>Current Timespan</li>
+    <h3>No blocks in this range</h3>
+    <p>Start viewing recent blocks</p>
+    <div class="btn-group">
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/21600">Last 6 Hours</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/86400">Last 24 Hours</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/604800">Last 7 Days</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/2592000">Last 30 Days</a>
+    </div>
   {% endif %}
-  {% endfor %}
-</ul>
 </div>
 {% endblock %}
