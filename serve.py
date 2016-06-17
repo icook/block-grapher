@@ -6,7 +6,8 @@ import logging
 import sqlalchemy.exc
 from decimal import Decimal
 from bitcoin.rpc import Proxy
-from flask import Flask, jsonify, render_template, session, redirect, url_for, Response, stream_with_context
+from flask import (Flask, jsonify, render_template, session, redirect, url_for,
+                   Response, stream_with_context, g)
 from flask.ext.sqlalchemy import SQLAlchemy
 import config
 
@@ -23,6 +24,9 @@ block_cache = {}
 # We store needed block information that is an ephemeral cache
 db = SQLAlchemy(app)
 
+@app.before_request
+def add_proxies():
+    g.proxies = proxies
 
 @app.template_filter('human_date')
 def human_date_utc(*args, **kwargs):
@@ -95,6 +99,16 @@ def home():
         last_block = Block.query.filter_by(currency=proxy.name).order_by(Block.time.desc()).first()
         coins.append((proxy, last_block))
     return render_template("home.html", coins=coins, now=int(time.time()))
+
+
+@app.route('/graph/<currency>/latest/<int:duration>')
+def latest_blocks(currency, duration):
+    proxy = proxies[currency]
+    last_block = Block.query.filter_by(currency=proxy.name).order_by(Block.time.desc()).first()
+    return redirect(url_for('graph',
+                            currency=currency,
+                            start=last_block.nTime - duration,
+                            stop=last_block.nTime))
 
 
 @app.route('/graph/<currency>/<int:start>/<int:stop>/')
