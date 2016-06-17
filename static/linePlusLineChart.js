@@ -269,14 +269,14 @@ nv.models.linePlusLineChart = function() {
                 }));
 
             var bars2Wrap = g.select('.nv-context .nv-barsWrap')
-                .datum(dataBars.length ? dataBars : [
-                    {values: []}
-                ]);
+                .datum(dataBars.filter(function(dataLine) {
+                         return !dataLine.bottomDisabled;
+                       }));
             var lines2Wrap = g.select('.nv-context .nv-linesWrap')
                 .datum(allDisabled(dataLines) ?
                        [{values: []}] :
                        dataLines.filter(function(dataLine) {
-                         return !dataLine.disabled;
+                         return !dataLine.bottomDisabled;
                        }));
 
             g.select('.nv-context')
@@ -420,14 +420,14 @@ nv.models.linePlusLineChart = function() {
                     .height(availableHeight1)
                     .color(data.map(function(d,i) {
                         return d.color || color(d, i);
-                    }).filter(function(d,i) { return !data[i].disabled && data[i].bar }));
+                    }).filter(function(d,i) { return !data[i].topDisabled && data[i].bar }));
 
                 lines
                     .width(availableWidth)
                     .height(availableHeight1)
                     .color(data.map(function(d,i) {
                         return d.color || color(d, i);
-                    }).filter(function(d,i) { return !data[i].disabled && !data[i].bar }));
+                    }).filter(function(d,i) { return !data[i].topDisabled && !data[i].bar }));
 
                 var focusBarsWrap = g.select('.nv-focus .nv-barsWrap')
                     .datum(!dataBars.length ? [{values:[]}] :
@@ -445,7 +445,7 @@ nv.models.linePlusLineChart = function() {
                 var focusLinesWrap = g.select('.nv-focus .nv-linesWrap')
                     .datum(allDisabled(dataLines) ? [{values:[]}] :
                            dataLines
-                           .filter(function(dataLine) { return !dataLine.disabled; })
+                           .filter(function(dataLine) { return !dataLine.topDisabled; })
                            .map(function(d,i) {
                                 return {
                                     area: d.area,

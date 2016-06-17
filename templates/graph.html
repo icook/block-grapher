@@ -11,8 +11,9 @@
   <style>
   #main_chart g.nv-context g.nv-scatter g.nv-series-0 path.nv-point
   {
+      stroke-width: 2px;
       fill-opacity: 0.3;
-      stroke-opacity: 0.2;
+      stroke-opacity: 0.25;
   }
   #main_chart g.nv-context g.nv-series-0 path.nv-line
   {
@@ -64,12 +65,14 @@
     var diffLineData = [];
     var subsidyLineData = [];
     var lastFifteenData = [];
+    var heightData = [];
     for (i = 1; i < blocks.length; i++) {
       var block = blocks[i];
       var blockDate = block.time * 1000;
       diffLineData.push({x: blockDate, y: block.difficulty});
       subsidyLineData.push({x: blockDate, y: parseFloat(block.subsidy)});
       lastFifteenData.push({x: blockDate, y: block.last_fifteen});
+      heightData.push({x: blockDate, y: block.height});
     }
 
     var chart = nv.models.linePlusLineChart()
@@ -84,10 +87,17 @@
     d3.select('#main_chart')
         .datum([
             {key: 'Difficulty',
+             bottomDisabled: true,
              values: diffLineData},
             {key: 'Subsidy',
+             bottomDisabled: true,
              values: subsidyLineData},
+            {key: 'Block height',
+             bar: true,
+             topDisabled: true,
+             values: heightData},
             {key: 'Last 15 Average',
+             bottomDisabled: true,
              bar: true,
              values: lastFifteenData}
             ])
