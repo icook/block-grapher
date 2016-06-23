@@ -393,7 +393,7 @@ nv.models.linePlusLineChart = function() {
                       }
                       if (point === undefined) return;
                       if (singlePoint === undefined) singlePoint = point;
-                      if (pointXLocation === undefined) pointXLocation = chart.xScale()(chart.x()(point,pointIndex));
+                      //if (pointXLocation === undefined) pointXLocation = chart.xScale()(chart.x()(point,pointIndex));
                       allData.push({
                           key: series.key,
                           value: pointYValue,
