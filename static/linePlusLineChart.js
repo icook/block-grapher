@@ -306,10 +306,6 @@ nv.models.linePlusLineChart = function() {
                     .scale(y3)
                     ._ticks( availableHeight2 / 36 )
                     .tickSize( -availableWidth, 0);
-                y4Axis
-                    .scale(y4)
-                    ._ticks( availableHeight2 / 36 )
-                    .tickSize(dataBars.length ? 0 : -availableWidth, 0); // Show the y2 rules only if y1 has none
 
                 g.select('.nv-context .nv-y3.nv-axis')
                     .style('opacity', dataBars.length ? 1 : 0)
@@ -320,8 +316,6 @@ nv.models.linePlusLineChart = function() {
 
                 g.select('.nv-context .nv-y1.nv-axis').transition()
                     .call(y3Axis);
-                g.select('.nv-context .nv-y2.nv-axis').transition()
-                    .call(y4Axis);
             }
 
             // Setup Brush
