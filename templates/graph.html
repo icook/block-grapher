@@ -167,7 +167,7 @@
         <th>Time Window</th>
         <td>
           <div class="btn-group">
-            {% for span in (3600, 21600, 86400, 604800, 2592000) %}
+            {% for span in (3600, 21600, 86400, 604800, 2592000, 7760000, 31536000) %}
             {% set halfspan = span // 2 %}
             <a class="{% if span == timespan %} disabled {% endif %} btn btn-default btn-sm" href="/graph/{{ proxy.name }}/{{ midpoint - halfspan }}/{{ stop + halfspan }}">{{ span | duration }}</a>
             {% endfor %}
@@ -178,7 +178,7 @@
         <th>Adjust Search Forward  <i class="fa fa-angle-double-right"></li></th>
         <td>
           <div class="btn-group">
-            {% for span in (3600, 21600, 86400, 604800, 2592000) %}
+            {% for span in (3600, 21600, 86400, 604800, 2592000, 7760000, 31536000) %}
             <a class="btn btn-default btn-sm" href="/graph/{{ proxy.name }}/{{ start + span }}/{{ stop + span }}">{{ span | duration }}</a>
             {% endfor %}
           </div>
@@ -188,7 +188,7 @@
         <th>Adjust Search Backward <i class="fa fa-angle-double-left"></li></th>
         <td>
           <div class="btn-group">
-            {% for span in (3600, 21600, 86400, 604800, 2592000) %}
+            {% for span in (3600, 21600, 86400, 604800, 2592000, 7760000, 31536000) %}
             <a class="btn btn-default btn-sm" href="/graph/{{ proxy.name }}/{{ start - span }}/{{ stop - span }}">{{ span | duration }}</a>
             {% endfor %}
           </div>
@@ -205,6 +205,8 @@
       <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/86400">Last 24 Hours</a>
       <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/604800">Last 7 Days</a>
       <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/2592000">Last 30 Days</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/7760000">Last 90 Days</a>
+      <a class="btn btn-default" href="/graph/{{ proxy.name }}/latest/31536000">Last year</a>
     </div>
   {% endif %}
 </div>

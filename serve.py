@@ -119,8 +119,7 @@ def graph(currency, start, stop):
     block_objs = (Block.query.filter_by(currency=currency).
                   filter(Block.time > start_dt).
                   filter(Block.time < stop_dt).
-                  order_by(Block.time.desc()).
-                  limit(2000))
+                  order_by(Block.time.desc()))
     blocks = [dict(difficulty=block.difficulty,
                    height=block.height,
                    time=block.nTime,
