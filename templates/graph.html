@@ -84,6 +84,18 @@
     chart.y1Axis.tickFormat(d3.format('s,.2f')).showMaxMin(false).axisLabel('Last 15 blocks hashrate (hashes per second)');
     chart.y2Axis.tickFormat(d3.format(',.2f')).showMaxMin(false).axisLabel('Difficulty & Subsidy');
 
+    chart.interactiveLayer.tooltip.headerFormatter(function(d) {
+      return d3.time.format('%b %d %H:%M:%S')(new Date(d));
+    });
+
+    chart.interactiveLayer.tooltip.valueFormatter(function(d,i) {
+      if (d == null)
+        return "N/A";
+      if (i == 3)
+        return chart.y1Axis.tickFormat()(d);
+      return chart.y2Axis.tickFormat()(d);
+    });
+
     d3.select('#main_chart')
         .datum([
             {key: 'Difficulty',
