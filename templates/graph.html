@@ -59,7 +59,6 @@
 
   var blocks = {{ blocks | tojson }};
   blocks.sort(function (a, b) { return a.height - b.height; });
-  blocks.reverse();
 
   nv.addGraph(function() {
     var diffLineData = [];
