@@ -163,7 +163,7 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
             yield "sync of {} unneeded\n".format(proxy.name)
             continue
 
-        app.logger.info("Starting sync for {}. {} blocks to sync".format(proxy.name, info['blocks'] - last_sync_height))
+        app.logger.info("Starting sync for {}. {} blocks to sync".format(proxy.name, info['blocks'] - last_sync_height + 1))
 
         # If we have to sync for too long abort trying to render the page. It
         # will be an unnaceptable delay
@@ -172,7 +172,7 @@ def sync_db(proxies_to_sync=None, max_sync_number=None):
 
         next_blockhash = None
         start = time.time()
-        for i in range(last_sync_height + 1, info['blocks']):
+        for i in range(last_sync_height + 1, info['blocks'] + 1):
             # If we found a next blockhash...
             if next_blockhash:
                 blockhash = next_blockhash
